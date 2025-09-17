@@ -108,7 +108,7 @@ async def main():
             continue
 
         if item.folder:
-            await map_children(DRIVE_ID, item, path=f"./{GIT_REPO_PATH}/{item.name}")
+            await map_children(DRIVE_ID, item, path=f"{GIT_REPO_PATH}/{item.name}")
 
     if len(UPDATED_FILES) == 0 and len(EMPTY_FOLDERS) == 0:
         logging.info("No changes detected in the last 15 minutes. Exiting...")
