@@ -8,9 +8,13 @@ from azure.identity.aio import ClientSecretCredential
 
 # Basic logging and git setup
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+logging.getLogger("azure").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 
 os.environ["GIT_SSH_COMMAND"] = f'ssh -i /app/ed25519 -o StrictHostKeyChecking=no'
 
@@ -92,11 +96,18 @@ async def main():
         if item.folder:
             await map_children(DRIVE_ID, item, path=f"./{GIT_REPO_PATH}/{item.name}")
 
-    if len(GIT_REPO.untracked_files) > 0 or len(GIT_REPO.index.diff(None)) > 0:
-        print("Changes detected, committing and pushing to GitHub...")
+    untracked_files = len(GIT_REPO.untracked_files)
+    changed_files = len(GIT_REPO.index.diff(None))
+
+    if untracked_files > 0 or changed_files > 0:
+        logging.info(f"Detected {untracked_files} new files")
+        logging.info(f"Detected {changed_files} changed files")
+        logging.info("Pushing to Git...")
         GIT_REPO.git.add(A=True)
-        GIT_REPO.index.commit("Automated commit: Sync GoodNotes with GitHub")
+        GIT_REPO.index.commit("Automated commit: Sync GoodNotes with Git")
         GIT_REPO.remote().push()
+    else:
+        logging.info("No changes detected")
 
 if __name__ == "__main__":
     asyncio.run(main())
