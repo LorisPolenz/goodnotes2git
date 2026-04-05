@@ -47,6 +47,9 @@ async def main():
 
     for (root, dirs, files) in os.walk('data/', topdown=True):
 
+        if ".git" in dirs:
+            continue
+
         if not dirs and not files:
             print(f"Creating {root}/.gitkeep")
             open(f"{root}/.gitkeep", 'w').close()
